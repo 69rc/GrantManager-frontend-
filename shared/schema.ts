@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Users table
@@ -11,17 +10,19 @@ export const users = pgTable("users", {
   fullName: text("full_name").notNull(),
   phoneNumber: text("phone_number"),
   role: text("role").notNull().default("user"), // "user" or "admin"
+  suspended: boolean("suspended").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-});
+
 
 // Public registration schema - omits role for security
-export const registerUserSchema = insertUserSchema.omit({
-  role: true,
+export const registerUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  fullName: z.string().min(1),
+  phoneNumber: z.string().nullable().optional(),
 });
 
 export const loginSchema = z.object({
@@ -29,8 +30,19 @@ export const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+// User insert schema without ID and timestamps
+export const insertUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  fullName: z.string().min(1),
+  phoneNumber: z.string().nullable().optional(),
+  role: z.string().optional().default("user"),
+  suspended: z.boolean().optional().default(false),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
+// Define User type with all fields from the users table
 export type User = typeof users.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 
@@ -55,12 +67,19 @@ export const grantApplications = pgTable("grant_applications", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertGrantApplicationSchema = createInsertSchema(grantApplications).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  status: true,
-  adminNotes: true,
+export const insertGrantApplicationSchema = z.object({
+  userId: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  phoneNumber: z.string(),
+  address: z.string(),
+  projectTitle: z.string(),
+  projectDescription: z.string(),
+  grantType: z.string(),
+  requestedAmount: z.number(),
+  fileUrl: z.string().optional(),
+  fileName: z.string().optional(),
+  disbursementAmount: z.number().optional(),
 });
 
 export const updateGrantApplicationStatusSchema = z.object({
@@ -82,9 +101,10 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
-  id: true,
-  createdAt: true,
+export const insertChatMessageSchema = z.object({
+  userId: z.string(),
+  senderRole: z.string(),
+  message: z.string(),
 });
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;

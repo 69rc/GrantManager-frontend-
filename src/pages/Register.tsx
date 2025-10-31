@@ -27,7 +27,7 @@ export default function Register() {
       email: "",
       password: "",
       fullName: "",
-      phoneNumber: "",
+      phoneNumber: null,
     },
   });
 
@@ -134,7 +134,8 @@ export default function Register() {
                         placeholder="+1 234 567 8900"
                         type="tel"
                         data-testid="input-phone"
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />

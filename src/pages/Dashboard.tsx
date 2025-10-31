@@ -128,7 +128,7 @@ export default function Dashboard() {
                         <p className="text-sm text-muted-foreground">{application.adminNotes}</p>
                       </div>
                     )}
-                    {application.status === "approved" && application.disbursementAmount !== undefined && (
+                    {application.status === "approved" && application.disbursementAmount != null && (
                       <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg mb-4 dark:from-amber-950/20 dark:to-orange-950/20 dark:border-amber-800">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="p-1.5 bg-amber-500 rounded-full">

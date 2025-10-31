@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { GraduationCap, Briefcase, Users, Lightbulb, CheckCircle, Clock, HeartHandshake, TrendingUp } from "lucide-react";
-import heroImage from "@assets/generated_images/Community_empowerment_hero_image_7472de27.png";
+// Removed import for non-existent image asset
+// import heroImage from "@assets/generated_images/Community_empowerment_hero_image_7472de27.png";
 import { grantTypes } from "@shared/schema";
 
 const iconMap = {
@@ -20,11 +21,7 @@ export default function Home() {
       <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
         {/* Background Image with dark overlay */}
         <div className="absolute inset-0 z-0">
-          <img
-            src={heroImage}
-            alt="Diverse community members collaborating"
-            className="w-full h-full object-cover"
-          />
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-chart-2/20" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/70" />
         </div>
 
