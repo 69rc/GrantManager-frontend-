@@ -2,9 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, Bot, Users, ExternalLink } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
 interface TelegramMessage {
@@ -15,7 +13,6 @@ interface TelegramMessage {
 }
 
 export function TelegramChat() {
-  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<TelegramMessage[]>([
     {
@@ -26,7 +23,7 @@ export function TelegramChat() {
     },
   ]);
   const [newMessage, setNewMessage] = useState("");
-  const [isConnected, setIsConnected] = useState(true);
+  const [isConnected] = useState(true);
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;

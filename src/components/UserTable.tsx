@@ -40,30 +40,6 @@ export function UserTable({ users, applications }: UserTableProps) {
   const [userAction, setUserAction] = useState<"view" | "suspend" | "delete" | null>(null);
 
   // User management mutations
-  const updateUserMutation = useMutation({
-    mutationFn: async ({ id, role }: { id: string; role: string }) => {
-      return apiRequest("PATCH", `/api/users/${id}/role`, { role });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      toast({
-        title: "User updated",
-        description: "User role has been updated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      // Handle the error appropriately
-      let errorMessage = "Could not update user role.";
-      if (error.message) {
-        errorMessage = error.message;
-      }
-      toast({
-        title: "Update failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    },
-  });
 
   const suspendUserMutation = useMutation({
     mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => {

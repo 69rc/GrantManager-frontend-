@@ -20,7 +20,7 @@ import { UserTable } from "@/components/UserTable";
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))"];
 
 export default function Admin() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [grantTypeFilter, setGrantTypeFilter] = useState<string>("all");
@@ -41,7 +41,7 @@ export default function Admin() {
     mutationFn: async ({ id, status, notes, disbursementAmount }: { id: string; status: string; notes: string; disbursementAmount?: number }) => {
       return apiRequest("PATCH", `/api/applications/${id}/status`, { status, adminNotes: notes, disbursementAmount });
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/applications"] });
       
       // Show different toast messages based on status
@@ -227,7 +227,7 @@ export default function Admin() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {statusData.map((entry, index) => (
+                  {statusData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, MessageCircle, Phone, Facebook, Instagram, Clock } from "lucide-react";
+import { Mail, MessageCircle, Facebook, Instagram, Clock } from "lucide-react";
 import { SiX } from "react-icons/si";
 
 export default function Contact() {

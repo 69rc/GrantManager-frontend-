@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 interface Message {
   id: string;
   userId: string;
+  targetUserId?: string;
   senderRole: "user" | "admin";
   message: string;
   createdAt: Date;
