@@ -1,12 +1,10 @@
-declare global {
-  interface ImportMeta {
-    readonly env: ImportMetaEnv;
-  }
+/// <reference types="vite/client" />
 
-  interface ImportMetaEnv {
-    readonly VITE_API_URL: string;
-    // Add other environment variables as needed
-  }
+interface ImportMetaEnv {
+  readonly VITE_API_URL: string;
+  // add more vars here...
 }
 
-export {};
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
