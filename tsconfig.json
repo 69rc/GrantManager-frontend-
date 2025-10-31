@@ -34,7 +34,8 @@
   },
   "include": [
     "src",
-    "shared/**/*"
+    "shared/**/*",
+    "src/types/**/*"
   ],
   "references": [
     {
