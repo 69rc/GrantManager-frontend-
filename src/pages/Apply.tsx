@@ -94,7 +94,7 @@ export default function Apply() {
       }
 
       // Submit with file upload
-      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const baseUrl = import.meta.env.API_URL || "";
       const fullUrl = `${baseUrl}/api/applications`;
       const response = await fetch(fullUrl, {
         method: "POST",

@@ -23,7 +23,7 @@ export async function apiRequest<T = any>(
     ...(data ? { "Content-Type": "application/json" } : {}),
   };
 
-  const baseUrl = import.meta.env.VITE_API_URL || "";
+  const baseUrl = import.meta.env.API_URL || "";
   const fullUrl = `${baseUrl}${url}`;
 
   const res = await fetch(fullUrl, {
@@ -63,7 +63,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const headers = getAuthHeaders();
-    const baseUrl = import.meta.env.VITE_API_URL || "";
+    const baseUrl = import.meta.env.API_URL || "";
     const fullUrl = `${baseUrl}${queryKey.join("/")}`;
     
     const res = await fetch(fullUrl, {
