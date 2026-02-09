@@ -19,8 +19,8 @@ export default function Apply() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [applicationError, setApplicationError] = useState<string | null>(null);
+
 
   const form = useForm<InsertGrantApplication>({
     resolver: zodResolver(insertGrantApplicationSchema),
@@ -39,22 +39,6 @@ export default function Apply() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        const errorMessage = "Please upload a file smaller than 10MB";
-        setApplicationError(errorMessage);
-        toast({
-          title: "File too large",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        return;
-      }
-      setSelectedFile(file);
-    }
-  };
 
   const onSubmit = async (data: InsertGrantApplication) => {
     if (!user) {
@@ -78,14 +62,6 @@ export default function Apply() {
         userId: user.id,
       };
 
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(applicationData));
-      
-      if (selectedFile) {
-        formData.append("file", selectedFile);
-      }
-
       // Get auth token
       const token = localStorage.getItem("token");
       const headers: HeadersInit = {};
@@ -93,13 +69,16 @@ export default function Apply() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      // Submit with file upload
-      const baseUrl = import.meta.env.API_URL || "";
+      // Submit with JSON
+      const baseUrl = import.meta.env.VITE_API_URL || "";
       const fullUrl = `${baseUrl}/api/applications`;
       const response = await fetch(fullUrl, {
         method: "POST",
-        headers,
-        body: formData,
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(applicationData),
       });
 
       // Clone response to handle errors without consuming body
@@ -168,8 +147,8 @@ export default function Apply() {
           <CardContent>
             {applicationError && (
               <div className="mb-6">
-                <Alert 
-                  variant="destructive" 
+                <Alert
+                  variant="destructive"
                   size="sm"
                   closable
                   onClose={() => setApplicationError(null)}
@@ -188,7 +167,7 @@ export default function Apply() {
                 {/* Personal Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Personal Information</h3>
-                  
+
                   <FormField
                     control={form.control}
                     name="fullName"
@@ -357,42 +336,9 @@ export default function Apply() {
                   />
                 </div>
 
-                {/* File Upload */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Supporting Documents</h3>
-                  <div className="border-2 border-dashed rounded-lg p-6">
-                    <div className="flex flex-col items-center justify-center space-y-4">
-                      <div className="p-4 bg-primary/10 rounded-full">
-                        {selectedFile ? (
-                          <FileText className="h-8 w-8 text-primary" />
-                        ) : (
-                          <Upload className="h-8 w-8 text-primary" />
-                        )}
-                      </div>
-                      {selectedFile ? (
-                        <div className="text-center">
-                          <p className="font-medium">{selectedFile.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Upload your proposal or budget document (PDF, max 10MB)
-                          </p>
-                        </div>
-                      )}
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={handleFileChange}
-                        className="max-w-xs"
-                        data-testid="input-file"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <p className="text-sm text-center text-muted-foreground italic">
+                  Note: Document upload is currently disabled. Please submit your request details above.
+                </p>
 
                 <Button
                   type="submit"
