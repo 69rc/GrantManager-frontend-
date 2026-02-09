@@ -43,9 +43,11 @@ export function ChatWidget() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    // Connect to WebSocket using the API URL from environment
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    // Convert https:// to wss:// or http:// to ws://
+    const wsUrl = apiUrl.replace(/^http/, "ws") + "/ws";
+
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -63,11 +65,11 @@ export function ChatWidget() {
           createdAt: new Date(data.createdAt),
         };
         setMessages((prev) => [...prev, message]);
-        
+
         // Increment unread if widget is closed and message is from other party
-        if (!isOpen && 
-            ((user.role === "user" && data.senderRole === "admin") || 
-             (user.role === "admin" && data.senderRole === "user" && data.userId === selectedUserId))) {
+        if (!isOpen &&
+          ((user.role === "user" && data.senderRole === "admin") ||
+            (user.role === "admin" && data.senderRole === "user" && data.userId === selectedUserId))) {
           setUnreadCount((prev) => prev + 1);
         }
       } else if (data.type === "history") {
@@ -186,11 +188,11 @@ export function ChatWidget() {
                 onChange={(e) => {
                   const userId = e.target.value || null;
                   setSelectedUserId(userId);
-                  
+
                   // If we're an admin and switching users, we should request the chat history for that user
                   if (user?.role === "admin" && userId && wsRef.current && isConnected) {
-                    wsRef.current.send(JSON.stringify({ 
-                      type: "getHistory", 
+                    wsRef.current.send(JSON.stringify({
+                      type: "getHistory",
                       userId: user.id,
                       targetUserId: userId
                     }));
@@ -215,19 +217,19 @@ export function ChatWidget() {
                 <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>Select a user to view their chat messages</p>
               </div>
-            ) : messages.filter(m => 
-                user?.role === "admin" && selectedUserId 
-                  ? m.userId === selectedUserId || m.targetUserId === selectedUserId 
-                  : user?.role === "user" ? m.senderRole === "admin" || m.userId === user.id : true
-              ).length === 0 ? (
+            ) : messages.filter(m =>
+              user?.role === "admin" && selectedUserId
+                ? m.userId === selectedUserId || m.targetUserId === selectedUserId
+                : user?.role === "user" ? m.senderRole === "admin" || m.userId === user.id : true
+            ).length === 0 ? (
               <div className="text-center text-muted-foreground text-sm mt-8">
                 <p>No messages yet.</p>
                 <p className="mt-2">Start a conversation{user?.role === "user" ? " with our support team" : ""}!</p>
               </div>
             ) : (
-              messages.filter(m => 
-                user?.role === "admin" && selectedUserId 
-                  ? m.userId === selectedUserId || m.targetUserId === selectedUserId 
+              messages.filter(m =>
+                user?.role === "admin" && selectedUserId
+                  ? m.userId === selectedUserId || m.targetUserId === selectedUserId
                   : user?.role === "user" ? m.senderRole === "admin" || m.userId === user.id : true
               ).map((msg) => (
                 <div
@@ -236,11 +238,10 @@ export function ChatWidget() {
                   data-testid={`message-${msg.id}`}
                 >
                   <div
-                    className={`max-w-[75%] rounded-lg p-3 ${
-                      msg.senderRole === user.role
+                    className={`max-w-[75%] rounded-lg p-3 ${msg.senderRole === user.role
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted"
-                    }`}
+                      }`}
                   >
                     <p className="text-sm">{msg.message}</p>
                     <p className="text-xs opacity-70 mt-1">
