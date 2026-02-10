@@ -7,6 +7,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { type GrantApplication } from "@shared/schema";
 import { Loader2, FileText, Clock, CheckCircle, XCircle, Plus } from "lucide-react";
 import { format } from "date-fns";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const statusConfig = {
   pending: { label: "Pending", icon: Clock, variant: "secondary" as const },
@@ -17,9 +20,30 @@ const statusConfig = {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: applications, isLoading } = useQuery<GrantApplication[]>({
     queryKey: ["/api/applications/user", user?.id],
+  });
+
+  const updatePaymentMethodMutation = useMutation({
+    mutationFn: async ({ id, paymentMethod }: { id: string, paymentMethod: string }) => {
+      return await apiRequest("PATCH", `/api/applications/${id}/payment-method`, { paymentMethod });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/applications/user", user?.id] });
+      toast({
+        title: "Success",
+        description: "Payment method updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
@@ -136,22 +160,63 @@ export default function Dashboard() {
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                           </div>
-                          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Disbursement Fee Required</p>
+                          <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Grant Approved - Disbursement Ready</p>
                         </div>
-                        <p className="text-base font-bold text-amber-700 dark:text-amber-300">
-                          ${application.disbursementAmount.toLocaleString()} Disbursement Fee Required
-                        </p>
-                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                          Your grant application has been approved but requires a disbursement fee payment.
-                        </p>
-                        <div className="mt-2 pt-2 border-t border-amber-200 dark:border-amber-800">
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            Please contact our support team to arrange payment of the disbursement fee.
-                            Reference: {application.id.slice(0, 8)}
+
+                        <div className="mb-4">
+                          <p className="text-sm text-amber-700 dark:text-amber-300">
+                            Congratulations! Your grant application has been approved. Please select your preferred payment method to receive the funds.
                           </p>
+                          <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
+                            <div className="text-center sm:text-left bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800 flex-1 w-full">
+                              <p className="text-xs uppercase tracking-wider font-bold text-amber-600 dark:text-amber-400 mb-1">Disbursement Fee</p>
+                              <p className="text-2xl font-black text-amber-700 dark:text-amber-300">
+                                ${application.disbursementAmount.toLocaleString()}
+                              </p>
+                            </div>
+
+                            <div className="flex-1 w-full">
+                              {application.paymentMethod ? (
+                                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-700 dark:text-green-300 text-center">
+                                  <p className="text-xs font-bold uppercase mb-1">Payment Method Selected</p>
+                                  <p className="font-semibold capitalize">{application.paymentMethod.replace("_", " ")}</p>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-white"
+                                    onClick={() => updatePaymentMethodMutation.mutate({ id: application.id, paymentMethod: "cheque" })}
+                                    disabled={updatePaymentMethodMutation.isPending}
+                                  >
+                                    Cheque
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-white"
+                                    onClick={() => updatePaymentMethodMutation.mutate({ id: application.id, paymentMethod: "bank_transfer" })}
+                                    disabled={updatePaymentMethodMutation.isPending}
+                                  >
+                                    Bank Transfer
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
+
+                        {!application.paymentMethod && (
+                          <div className="pt-3 border-t border-amber-200 dark:border-amber-800">
+                            <p className="text-xs text-amber-600 dark:text-amber-400 italic">
+                              * Select a payment method to proceed with the disbursement process.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
+
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
